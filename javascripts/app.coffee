@@ -41,10 +41,33 @@ class MapView extends Backbone.View
 
     @initMap()
     @addmarker()
+    @addmarkers()
 
     $.getJSON "/places.json", (data) =>
       if data.objects?
         @places.reset(data.objects)
+
+  addmarkers: ->
+    ll = @model.get('center').split(',')
+    center = new google.maps.LatLng(ll[0], ll[1])
+
+    marker = new google.maps.Marker(
+      position: center
+      map: @map
+      draggable: true
+      animation: google.maps.Animation.DROP
+      title: center.lat() + "," + center.lng()
+    )
+    google.maps.event.addListener marker, "dragend", (event) -> 
+        $.post "/places/post_test/", 
+          id: 660
+          lat: marker.position.Pa
+          lng: marker.position.Qa
+          (data) -> $('body').append "Successfully posted to the page."
+
+    @markers.push marker
+    @map.setCenter center
+
 
   addmarker: ->
     ll = @model.get('center').split(',')
@@ -67,7 +90,6 @@ class MapView extends Backbone.View
     @markers.push marker
     @map.setCenter center
 
-    this
 
   initMap: ->
     mapOptions =
