@@ -54,10 +54,11 @@
 
 	<script type="text/javascript" src="javascripts/jquery-1.7.1.min.js"></script>
     <script type="text/javascript" src="javascripts/underscore.js"></script>
+    <script type="text/javascript" src="javascripts/json2.js"></script>
     <script type="text/javascript" src="javascripts/backbone.js"></script>
 
 
-	<script type="text/javascript" src="//maps.googleapis.com/maps/api/js?sensor=false" />
+    <script type="text/javascript" src="//maps.googleapis.com/maps/api/js?sensor=false"></script>
 
     <script type="text/javascript" src="javascripts/models.js"></script>
     <script type="text/javascript" src="javascripts/app.js"></script>
@@ -65,7 +66,18 @@
 	<script type="text/javascript">
 		zoom = 10;
 		center = "10.001025,-84.134588";
-		app = new MapView(null, zoom);
+
+    var appData = new AppData({
+      zoom: 10,
+      center: "10.001025,-84.134588"
+    });
+    
+    // app = new MapView(null, zoom);
+    var app = new MapView({
+      model: appData,
+      title: "This is a title"
+    });
+
 		x = 0;
 	</script>
 

@@ -2,33 +2,37 @@ _.templateSettings = interpolate: /\{\{(.+?)\}\}/g
 
 
 class MapView extends Backbone.View
-  constructor: (center, zoom) ->
-    @map = null
-    @model = null
-    @center = center
-    @zoom = zoom
-    @markers = []
-    super("MapView")
+  #constructor: (center, zoom) ->
+    #@map = null
+    #@model = null
+    #@center = center
+    #@zoom = zoom
+    #@markers = []
+    #super("MapView")
 
   initialize: ->
-    @appData = new AppData()
+    #@appData = new AppData()
+    @markers = []
     @map = null
 
-    # if no zoom was passed, used AppData default zoom level
-    if @zoom == 0
-      @zoom = @appData.get("zoom")
+    @places = new Places()
+    @places.bind "reset", @markPlaces
 
-    if @center == ""
-      @center = @appData.get("center").split ","
-    else
-      @center = @center.split ","
+    # if no zoom was passed, used AppData default zoom level
+    #if @zoom == 0
+      #@zoom = @model.get("zoom")
+
+    #if @center == ""
+      #@center = @model.get("center").split ","
+    #else
+      #@center = @center.split ","
 
     defaults =
       mapId: "map-canvas"
       # center: new google.maps.LatLng(@center[0], @center[1])
-      center: @center
+      center: @model.get('center')
       mapTypeId: google.maps.MapTypeId.ROADMAP
-      zoom: @zoom
+      zoom: @model.get('zoom')
 
     @options = $.extend defaults, @options
     
@@ -38,8 +42,13 @@ class MapView extends Backbone.View
     @initMap()
     @addmarker()
 
+    $.getJSON "/places.json", (data) =>
+      if data.objects?
+        @places.reset(data.objects)
+
   addmarker: ->
-    center = new google.maps.LatLng(@options.center[0], @options.center[1])
+    ll = @model.get('center').split(',')
+    center = new google.maps.LatLng(ll[0], ll[1])
 
     marker = new google.maps.Marker(
       position: center
@@ -63,7 +72,7 @@ class MapView extends Backbone.View
   initMap: ->
     mapOptions =
       zoom: @options.zoom
-      center: new google.maps.LatLng(@options.center[0], @options.center[1]) 
+      center: new google.maps.LatLng(@model.get('center')[0], @model.get('center')[1]) 
       mapTypeId: @options.mapTypeId
       # panControlOptions:
       #   position: google.maps.ControlPosition.RIGHT_TOP
@@ -73,6 +82,20 @@ class MapView extends Backbone.View
     mapEl = document.getElementById @options.mapId
     @map = new google.maps.Map mapEl, mapOptions
 
+  markPlaces: (places) =>
+    places.each (place) =>
+      #match = place.get('point').match(/(\-?\d+(?:\.\d+)?)\s(\-?\d+(?:\.\d+)?)/)
+      #lat = match[1]
+      #lng = match[2]
+
+      #re = re.compile(/(\d+(\.\d+)?)\s(\d+(\.\d+)?)/)
+      #match = reobj.search(place,get('point'))
+        #if match:
+           #result = match.group("groupname")
+        #else:
+         #result = ""
+
+      console.log place.id, place.get('lat'), place.get('lng')
 
 window.MapView = MapView
 
