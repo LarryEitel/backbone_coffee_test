@@ -32,3 +32,28 @@ class @Places extends Backbone.Collection
 
   parse: (resp, xhr) ->
     resp.objects
+
+  show: ->
+    @trigger 'show'
+    @each (place) => place.trigger 'show'
+
+  hide: ->
+    @trigger 'hide'
+    @each (place) => place.trigger 'hide'
+
+class @PlaceType extends Backbone.Model
+  initialize: ->
+    @places = new Places()
+    @places.url = "/places/#{@id}.json"
+
+  show: ->
+    @trigger 'show'
+    @places.show()
+
+  hide: ->
+    @trigger 'hide'
+    @places.hide()
+
+class @PlaceTypes extends Backbone.Collection
+  model: PlaceType
+

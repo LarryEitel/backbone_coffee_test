@@ -43,9 +43,17 @@
 
 	<!-- Delete everything in this .container and get started on your own site! -->
 
-	<div class="container">
-	<div class="map-container map16"><div id="map-canvas" /></div>
-	</div><!-- container -->
+  <div id="map">
+    <div class="container">
+      <div class="map-container map16">
+        <div id="place-types">
+          <input id="place-types-1" name="place-types" type="checkbox" value="1" checked="checked" /><label for="place-types-1">School</label>
+          <input id="place-types-2" name="place-types" type="checkbox" value="2" /><label for="place-types-2">Business</label>
+        </div>
+        <div id="map-canvas" />
+      </div>
+    </div><!-- container -->
+  </div>
 
 
 
@@ -72,17 +80,21 @@
       center: "10.001025,-84.134588"
     });
 
-    var places = new Places();
-    places.url = "/places.json";
+    var placeTypes = new PlaceTypes();
+    placeTypes.add({id: 1, name: "school"});
+    placeTypes.add({id: 2, name: "business"});
 
     var app = new MapView({
-      el: '#map-canvas',
+      el: '#map',
       model: appData,
-      collection: places,
+      collection: placeTypes,
       title: "This is a title"
     });
 
-    places.fetch();
+    // placeTypes.get(1).show();
+    // placeTypes.get(2).show();
+
+    //places.fetch();
 
 		x = 0;
 	</script>

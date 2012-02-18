@@ -7,7 +7,7 @@
     child.prototype = new ctor;
     child.__super__ = parent.prototype;
     return child;
-  };
+  }, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
   CR = "10.001025 -84.134588";
   this.AppData = (function() {
     __extends(AppData, Backbone.Model);
@@ -58,6 +58,45 @@
     Places.prototype.parse = function(resp, xhr) {
       return resp.objects;
     };
+    Places.prototype.show = function() {
+      this.trigger('show');
+      return this.each(__bind(function(place) {
+        return place.trigger('show');
+      }, this));
+    };
+    Places.prototype.hide = function() {
+      this.trigger('hide');
+      return this.each(__bind(function(place) {
+        return place.trigger('hide');
+      }, this));
+    };
     return Places;
+  })();
+  this.PlaceType = (function() {
+    __extends(PlaceType, Backbone.Model);
+    function PlaceType() {
+      PlaceType.__super__.constructor.apply(this, arguments);
+    }
+    PlaceType.prototype.initialize = function() {
+      this.places = new Places();
+      return this.places.url = "/places/" + this.id + ".json";
+    };
+    PlaceType.prototype.show = function() {
+      this.trigger('show');
+      return this.places.show();
+    };
+    PlaceType.prototype.hide = function() {
+      this.trigger('hide');
+      return this.places.hide();
+    };
+    return PlaceType;
+  })();
+  this.PlaceTypes = (function() {
+    __extends(PlaceTypes, Backbone.Collection);
+    function PlaceTypes() {
+      PlaceTypes.__super__.constructor.apply(this, arguments);
+    }
+    PlaceTypes.prototype.model = PlaceType;
+    return PlaceTypes;
   })();
 }).call(this);
