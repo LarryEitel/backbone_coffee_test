@@ -68,15 +68,21 @@
 		center = "10.001025,-84.134588";
 
     var appData = new AppData({
-      zoom: 10,
+      zoom: 16,
       center: "10.001025,-84.134588"
     });
-    
-    // app = new MapView(null, zoom);
+
+    var places = new Places();
+    places.url = "/places.json";
+
     var app = new MapView({
+      el: '#map-canvas',
       model: appData,
+      collection: places,
       title: "This is a title"
     });
+
+    places.fetch();
 
 		x = 0;
 	</script>

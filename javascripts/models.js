@@ -8,7 +8,7 @@
     child.__super__ = parent.prototype;
     return child;
   };
-  CR = "10.001025,-84.134588";
+  CR = "10.001025 -84.134588";
   this.AppData = (function() {
     __extends(AppData, Backbone.Model);
     function AppData() {
@@ -16,7 +16,14 @@
     }
     AppData.prototype.defaults = {
       center: CR,
-      zoom: 12
+      zoom: 16,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+    AppData.prototype.initialize = function(attributes) {
+      var ll;
+      ll = attributes.center.split(',');
+      this.set('centerLat', ll[0]);
+      return this.set('centerLng', ll[1]);
     };
     return AppData;
   })();
@@ -48,6 +55,9 @@
       Places.__super__.constructor.apply(this, arguments);
     }
     Places.prototype.model = Place;
+    Places.prototype.parse = function(resp, xhr) {
+      return resp.objects;
+    };
     return Places;
   })();
 }).call(this);

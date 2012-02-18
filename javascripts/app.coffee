@@ -1,101 +1,39 @@
 _.templateSettings = interpolate: /\{\{(.+?)\}\}/g
 
 
-class MapView extends Backbone.View
-  #constructor: (center, zoom) ->
-    #@map = null
-    #@model = null
-    #@center = center
-    #@zoom = zoom
-    #@markers = []
-    #super("MapView")
-
+class @MapView extends Backbone.View
   initialize: ->
-    #@appData = new AppData()
-    @markers = []
-    @map = null
+    @render()
 
-    @places = new Places()
-    @places.bind "reset", @markPlaces
-
-    # if no zoom was passed, used AppData default zoom level
-    #if @zoom == 0
-      #@zoom = @model.get("zoom")
-
-    #if @center == ""
-      #@center = @model.get("center").split ","
-    #else
-      #@center = @center.split ","
-
-    defaults =
-      mapId: "map-canvas"
-      # center: new google.maps.LatLng(@center[0], @center[1])
-      center: @model.get('center')
-      mapTypeId: google.maps.MapTypeId.ROADMAP
+  render: ->
+    @map = new google.maps.Map @el,
       zoom: @model.get('zoom')
+      center: new google.maps.LatLng(@model.get('centerLat'), @model.get('centerLng'))
+      mapTypeId: @model.get('mapTypeId')
+    @placesView = new PlacesView(collection: @collection, map: @map)
 
-    @options = $.extend defaults, @options
-    
-    # # Bind 'this' to this object in event callbacks.
-    # _.bindAll @, "addAll", "addOne", "render", "remove"
+class @PlacesView extends Backbone.View
+  initialize: ->
+    @map = @options.map
+    @collection.bind 'reset', @render
+    @render() if @collection.length > 0
 
-    @initMap()
-    @addmarker()
+  render: =>
+    @collection.each (place) =>
+      new PlaceItemView(model: place, map: @map)
 
-    $.getJSON "/places.json", (data) =>
-      if data.objects?
-        @places.reset(data.objects)
+class @PlaceItemView extends Backbone.View
+  initialize: ->
+    @map = @options.map
+    @render()
 
-  addmarker: ->
-    ll = @model.get('center').split(',')
-    center = new google.maps.LatLng(ll[0], ll[1])
-
+  render: ->
+    position = new google.maps.LatLng(@model.get('lat'), @model.get('lng'))
     marker = new google.maps.Marker(
-      position: center
+      position: position
       map: @map
       draggable: true
       animation: google.maps.Animation.DROP
-      title: center.lat() + "," + center.lng()
+      title: position.lat() + "," + position.lng()
     )
-    google.maps.event.addListener marker, "dragend", (event) -> 
-        $.post "/places/post_test/", 
-          id: 660
-          lat: marker.position.Pa
-          lng: marker.position.Qa
-          (data) -> $('body').append "Successfully posted to the page."
-
-    @markers.push marker
-    @map.setCenter center
-
-    this
-
-  initMap: ->
-    mapOptions =
-      zoom: @options.zoom
-      center: new google.maps.LatLng(@model.get('center')[0], @model.get('center')[1]) 
-      mapTypeId: @options.mapTypeId
-      # panControlOptions:
-      #   position: google.maps.ControlPosition.RIGHT_TOP
-      # zoomControlOptions:
-      #   position: google.maps.ControlPosition.RIGHT_TOP
-
-    mapEl = document.getElementById @options.mapId
-    @map = new google.maps.Map mapEl, mapOptions
-
-  markPlaces: (places) =>
-    places.each (place) =>
-      #match = place.get('point').match(/(\-?\d+(?:\.\d+)?)\s(\-?\d+(?:\.\d+)?)/)
-      #lat = match[1]
-      #lng = match[2]
-
-      #re = re.compile(/(\d+(\.\d+)?)\s(\d+(\.\d+)?)/)
-      #match = reobj.search(place,get('point'))
-        #if match:
-           #result = match.group("groupname")
-        #else:
-         #result = ""
-
-      console.log place.id, place.get('lat'), place.get('lng')
-
-window.MapView = MapView
 

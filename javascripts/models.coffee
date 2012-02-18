@@ -1,15 +1,16 @@
 
-CR = "10.001025,-84.134588" # no space between
-
-#@AppData = Backbone.Model.extend(defaults:
-  #center: CR # center lat lng
-  #zoom: 12 # zoom level
-#)
+CR = "10.001025 -84.134588" # no space between
 
 class @AppData extends Backbone.Model
   defaults:
     center: CR
-    zoom: 12
+    zoom: 16
+    mapTypeId: google.maps.MapTypeId.ROADMAP
+
+  initialize: (attributes) ->
+    ll = attributes.center.split(',')
+    @set('centerLat', ll[0])
+    @set('centerLng', ll[1])
 
 # A place has a location
 class @Place extends Backbone.Model
@@ -28,3 +29,6 @@ class @Place extends Backbone.Model
 
 class @Places extends Backbone.Collection
   model: Place
+
+  parse: (resp, xhr) ->
+    resp.objects
