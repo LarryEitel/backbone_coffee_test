@@ -8,11 +8,25 @@ class @MapView extends Backbone.View
   initialize: ->
     @render()
 
+
   render: ->
     @map = new google.maps.Map @$('#map-canvas').get(0),
       zoom: @model.get('zoom')
       center: new google.maps.LatLng(@model.get('centerLat'), @model.get('centerLng'))
       mapTypeId: @model.get('mapTypeId')
+
+
+    google.maps.event.addListener @map, "click", (event) ->
+      console.log event.latLng
+      window.placeTypes.models[0].places.add({id:3, point: 'POINT (10.001 -84.134)'})
+      debugger
+      # make into a function: @addPlace(event)
+
+    # google.maps.event.addListener @map, "click", => @addPlace()
+    # location: event.latLng
+    # centered: false
+
+
 
     @collection.each (placeType) =>
       new PlaceTypeView(model: placeType, collection: placeType.places, map: @map)
@@ -20,6 +34,8 @@ class @MapView extends Backbone.View
     @$('input[type="checkbox"]:checked').each (index, el) =>
       model = @collection.get($(el).val())
       model.show()
+
+
 
   _togglePlaceType: (e) ->
     inputEl = @$(e.target)
@@ -72,7 +88,22 @@ class @PlaceItemView extends Backbone.View
       animation: google.maps.Animation.DROP
       title: @position.lat() + "," + @position.lng()
     )
+
+    google.maps.event.addListener @marker, "dragend", => @dragend()
+
     @show()
+
+  dragend: ->
+    console.log 'PlaceItemView#dragend'
+    # need to emulate Post for testing
+
+    @model.set(lat:  @marker.position.Pa, lng: @marker.position.Qa) 
+
+    # $.post "/places/post_test/", 
+    #   id: @model.id
+    #   lat: @marker.position.Pa
+    #   lng: @marker.position.Qa
+    #   (data) -> $('body').append "Successfully posted to the page."
 
   show: =>
     @marker.setMap(@map)
