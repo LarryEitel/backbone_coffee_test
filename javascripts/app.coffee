@@ -16,10 +16,12 @@ class @MapView extends Backbone.View
       mapTypeId: @model.get('mapTypeId')
 
 
-    google.maps.event.addListener @map, "click", (event) ->
-      console.log event.latLng
-      window.placeTypes.models[0].places.add({id:3, point: 'POINT (10.001 -84.134)'})
-      debugger
+    google.maps.event.addListener @map, "click", (event) =>
+      lat = event.latLng.lat()
+      lng = event.latLng.lng()
+      @collection.get(1).places.create(point: "POINT (#{lat} #{lng})")
+
+      # window.placeTypes.models[0].places.add({id:3, point: 'POINT (10.001 -84.134)'})
       # make into a function: @addPlace(event)
 
     # google.maps.event.addListener @map, "click", => @addPlace()
@@ -64,20 +66,24 @@ class @PlacesView extends Backbone.View
   initialize: ->
     @map = @options.map
     @placeItemViews = []
+    @collection.bind 'add', @addPlaceItemView
     @collection.bind 'reset', @render
     @render() if @collection.length > 0
 
   render: =>
     _.each @placeItemViews, (placeItemView) =>
       placeItemView.hide()
-    @collection.each (place) =>
-      @placeItemViews.push(new PlaceItemView(model: place, map: @map))
+    @collection.each @addPlaceItemView
+
+  addPlaceItemView: (place) =>
+    @placeItemViews.push(new PlaceItemView(model: place, map: @map))
 
 class @PlaceItemView extends Backbone.View
   initialize: ->
     @map = @options.map
     @model.bind 'show', @show
     @model.bind 'hide', @hide
+    @model.bind 'change', @persist
     @render()
 
   render: ->
@@ -89,11 +95,11 @@ class @PlaceItemView extends Backbone.View
       title: @position.lat() + "," + @position.lng()
     )
 
-    google.maps.event.addListener @marker, "dragend", => @dragend()
+    google.maps.event.addListener @marker, "dragend", @dragend
 
     @show()
 
-  dragend: ->
+  dragend: =>
     console.log 'PlaceItemView#dragend'
     # need to emulate Post for testing
 
@@ -110,3 +116,6 @@ class @PlaceItemView extends Backbone.View
 
   hide: =>
     @marker.setMap(null)
+
+  persist: =>
+    @model.save()
